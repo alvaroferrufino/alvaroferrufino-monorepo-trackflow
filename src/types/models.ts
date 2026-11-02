@@ -100,6 +100,7 @@ export interface Carrier {
   onTimeRate: number;
   maxWeightKg: number;
   handlesFragile: boolean;
+  active: boolean;
   acceptsPriority: ShipmentPriority[];
 }
 
