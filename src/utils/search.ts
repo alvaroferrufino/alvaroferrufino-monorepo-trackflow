@@ -23,6 +23,42 @@ export function findProductBySku(
   return products.find((product) => product.sku === sku);
 }
 
+/**
+ * Performs a binary search on a list of products sorted by SKU (ascending).
+ *
+ * @param products - Array of products **already sorted** by `sku` (ascending).
+ * @param targetSku - The SKU to search for.
+ * @returns The index of the product if found, or `-1` if not found or the array is empty.
+ */
+export function binarySearchBySku(
+  products: Product[],
+  targetSku: string,
+): number {
+  if (products.length === 0) {
+    return -1;
+  }
+
+  let left = 0;
+  let right = products.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const midSku = products[mid].sku;
+
+    if (midSku === targetSku) {
+      return mid;
+    }
+
+    if (midSku < targetSku) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return -1;
+}
+
 // ------------------------------------------------------------
 // Shipment search
 // ------------------------------------------------------------
