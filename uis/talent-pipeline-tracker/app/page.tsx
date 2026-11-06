@@ -1,22 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-const STATUS_LABELS = {
-  received: "Recibida",
-  in_progress: "En proceso",
-  selected: "Seleccionada",
-  discarded: "Descartada",
-};
-
-const STAGE_LABELS = {
-  pending: "Pendiente de revisión",
-  review: "En revisión",
-  personal_interview: "Entrevista personal",
-  technical_interview: "Entrevista técnica",
-  offer_presented: "Oferta presentada",
-};
+import { getLabel, getStageLabel, getStageValue, STAGE_LABELS, STATUS_LABELS } from "./lib/labels";
 
 interface Application {
   id: string;
@@ -40,10 +27,6 @@ function isApplication(value: unknown): value is Application {
       (field) => field in value && typeof value[field as keyof typeof value] === "string",
     )
   );
-}
-
-function getLabel(labels: Record<string, string>, value: string, fallback: string) {
-  return Object.hasOwn(labels, value) ? labels[value] : fallback;
 }
 
 function Loading() {
@@ -83,7 +66,7 @@ function ApplicationList() {
           url.searchParams.set("page", String(page));
           url.searchParams.set("limit", "100");
           if (status) url.searchParams.set("status", status);
-          if (stage) url.searchParams.set("stage", stage);
+          if (stage && stage !== "completed") url.searchParams.set("stage", stage);
 
           const response = await fetch(url, { signal: controller.signal });
           if (!response.ok) {
@@ -142,8 +125,10 @@ function ApplicationList() {
   const query = search.trim().toLocaleLowerCase("es");
   const applications = currentResult?.status === "success"
     ? currentResult.data.filter((application) =>
-        application.full_name.toLocaleLowerCase("es").includes(query) ||
-        application.email.toLocaleLowerCase("es").includes(query),
+        (!stage || getStageValue(application) === stage) && (
+          application.full_name.toLocaleLowerCase("es").includes(query) ||
+          application.email.toLocaleLowerCase("es").includes(query)
+        ),
       )
     : [];
   const inputClass = "min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-900 focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700";
@@ -216,12 +201,17 @@ function ApplicationList() {
                     {applications.map((application) => (
                       <tr key={application.id} className="hover:bg-zinc-50">
                         <th scope="row" className="max-w-xs break-words px-4 py-4 font-normal">
-                          <span className="font-semibold">{application.full_name}</span>
+                          <Link
+                            href={`/candidates/${encodeURIComponent(application.id)}`}
+                            className="font-semibold text-emerald-800 hover:underline focus:outline-2 focus:outline-offset-2 focus:outline-emerald-700"
+                          >
+                            {application.full_name}
+                          </Link>
                           <span className="mt-1 block text-zinc-600">{application.email}</span>
                         </th>
                         <td className="max-w-xs break-words px-4 py-4">{application.position}</td>
                         <td className="px-4 py-4">{getLabel(STATUS_LABELS, application.status, "Estado desconocido")}</td>
-                        <td className="px-4 py-4">{getLabel(STAGE_LABELS, application.stage, "Etapa desconocida")}</td>
+                        <td className="px-4 py-4">{getStageLabel(application)}</td>
                       </tr>
                     ))}
                   </tbody>
