@@ -2,3 +2,5 @@ node_modules/
 .venv/
 dist/
 .DS_Store
+uis/talent-pipeline-tracker/test-results/
+uis/talent-pipeline-tracker/playwright-report/

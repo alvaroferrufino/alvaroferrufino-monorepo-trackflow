@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getLabel, getStageLabel, getStageValue, STAGE_LABELS, STATUS_LABELS } from "./lib/labels";
+import { Plus } from "lucide-react";
+import CandidateForm from "@/components/forms/candidate-form";
 
 interface Application {
   id: string;
@@ -40,6 +42,8 @@ function ApplicationList() {
   const [search, setSearch] = useState("");
   const [retry, setRetry] = useState(0);
   const [result, setResult] = useState<LoadState>(null);
+  const [creating, setCreating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const statusParam = searchParams.get("status") ?? "";
   const stageParam = searchParams.get("stage") ?? "";
   const status = Object.hasOwn(STATUS_LABELS, statusParam) ? statusParam : "";
@@ -135,6 +139,24 @@ function ApplicationList() {
 
   return (
     <>
+      <div className="mb-5 flex justify-end">
+        <button type="button" disabled={creating} onClick={() => { setSuccessMessage(""); setCreating(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-60">
+          <Plus size={18} aria-hidden="true" /> Nueva candidatura
+        </button>
+      </div>
+      {successMessage && <p role="status" className="mb-5 border-l-4 border-emerald-600 bg-emerald-50 p-3 text-sm text-emerald-900">{successMessage}</p>}
+      {creating && (
+        <div className="mb-6">
+          <CandidateForm
+            onCancel={() => setCreating(false)}
+            onSuccess={() => {
+              setCreating(false);
+              setSuccessMessage("Candidatura registrada con éxito.");
+              setRetry((value) => value + 1);
+            }}
+          />
+        </div>
+      )}
       <div className="grid gap-4 border-y border-zinc-200 py-5 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
         <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
           Buscar por nombre o email

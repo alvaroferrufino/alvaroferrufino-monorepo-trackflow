@@ -2,20 +2,12 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { getLabel, isTerminalStatus, STAGE_LABELS, STATUS_LABELS } from "../../lib/labels";
-
-interface Candidate {
-  id: string;
-  full_name: string;
-  email: string;
-  phone: string | null;
-  position: string;
-  years_experience: number | null;
-  linkedin_url: string | null;
-  cv_url: string | null;
-  status: string;
-  stage: string;
-  created_at: string | null;
-}
+import type { Candidate } from "../../lib/candidates";
+import { Pencil } from "lucide-react";
+import CandidateForm from "@/components/forms/candidate-form";
+import { parseCandidate, RECRUITMENT_SOURCE_OPTIONS, WORK_AUTHORIZATION_OPTIONS } from "../../lib/candidates";
+import { COUNTRY_LABELS } from "../../lib/countries";
+import { restoreCandidateExtension } from "../../lib/candidate-storage";
 
 type LoadState =
   | { key: string; status: "success"; data: Candidate }
@@ -23,48 +15,6 @@ type LoadState =
   | null;
 
 const dateFormatter = new Intl.DateTimeFormat("es-ES", { dateStyle: "long", timeStyle: "short" });
-
-function pickString(source: Record<string, unknown>, ...keys: string[]) {
-  for (const key of keys) {
-    const value = source[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (typeof value === "number") return String(value);
-  }
-  return null;
-}
-
-function pickNumber(source: Record<string, unknown>, ...keys: string[]) {
-  for (const key of keys) {
-    const value = Number(source[key]);
-    if (source[key] !== null && source[key] !== "" && Number.isFinite(value)) return value;
-  }
-  return null;
-}
-
-function parseCandidate(payload: unknown): Candidate | null {
-  if (typeof payload !== "object" || payload === null) return null;
-  const wrapper = payload as Record<string, unknown>;
-  const inner = wrapper.data ?? wrapper.record ?? wrapper.candidate;
-  const source = (typeof inner === "object" && inner !== null && !Array.isArray(inner) ? inner : wrapper) as Record<string, unknown>;
-
-  const id = pickString(source, "id");
-  const fullName = pickString(source, "full_name", "name");
-  if (!id || !fullName) return null;
-
-  return {
-    id,
-    full_name: fullName,
-    email: pickString(source, "email") ?? "",
-    phone: pickString(source, "phone", "phone_number"),
-    position: pickString(source, "position") ?? "",
-    years_experience: pickNumber(source, "years_experience", "years_of_experience", "experience_years"),
-    linkedin_url: pickString(source, "linkedin_url", "linkedin"),
-    cv_url: pickString(source, "cv_url", "cv", "resume_url"),
-    status: pickString(source, "status") ?? "",
-    stage: pickString(source, "stage") ?? "",
-    created_at: pickString(source, "created_at", "applied_at", "date"),
-  };
-}
 
 // Only http(s) links are rendered to avoid javascript: and similar schemes.
 function safeUrl(value: string | null) {
@@ -84,8 +34,9 @@ function formatDate(value: string | null) {
 }
 
 function ExternalLink({ href, label }: { href: string | null; label: string }) {
+  if (!href?.trim()) return <NotIndicated />;
   const url = safeUrl(href);
-  if (!url) return href ? <span className="break-all">{href}</span> : null;
+  if (!url) return <span className="break-all">{href}</span>;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="break-all font-medium text-emerald-800 hover:underline">
       {label}
@@ -93,11 +44,16 @@ function ExternalLink({ href, label }: { href: string | null; label: string }) {
   );
 }
 
+function NotIndicated() {
+  return <span className="text-zinc-400">No indicado</span>;
+}
+
 function Field({ label, children }: { label: string; children: ReactNode }) {
+  const empty = children === null || children === undefined || typeof children === "boolean" || (typeof children === "string" && !children.trim());
   return (
     <div className="min-w-0">
       <dt className="text-sm text-zinc-500">{label}</dt>
-      <dd className="mt-1 break-words text-zinc-900">{children || <span className="text-zinc-400">No disponible</span>}</dd>
+      <dd className="mt-1 break-words text-zinc-900">{empty ? <NotIndicated /> : children}</dd>
     </div>
   );
 }
@@ -108,6 +64,7 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
   const [savingField, setSavingField] = useState<"status" | "stage" | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [editing, setEditing] = useState(false);
   const updateInFlight = useRef(false);
   const requestKey = `${candidateId}:${retry}`;
   const current = result?.key === requestKey ? result : null;
@@ -136,8 +93,9 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
         if (!candidate) {
           throw new Error("La API devolvió datos del candidato incompletos.");
         }
+        const restored = await restoreCandidateExtension(baseUrl, candidate);
         if (!controller.signal.aborted) {
-          setResult({ key: requestKey, status: "success", data: candidate });
+          setResult({ key: requestKey, status: "success", data: restored });
         }
       } catch (error) {
         if (!controller.signal.aborted) {
@@ -236,9 +194,33 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
   const years = candidate.years_experience;
   const isTerminalState = isTerminalStatus(candidate.status);
 
+  if (editing) {
+    return (
+      <section aria-label="Edición de candidatura" className="mb-10">
+        <CandidateForm
+          key={candidate.id}
+          candidate={candidate}
+          onCancel={() => setEditing(false)}
+          onSuccess={(input) => {
+            setResult((previous) => previous?.key === requestKey && previous.status === "success"
+              ? { ...previous, data: { ...previous.data, ...input, years_experience: input.experience_years } }
+              : previous);
+            setEditing(false);
+            setSuccessMessage("Candidatura actualizada con éxito.");
+          }}
+        />
+      </section>
+    );
+  }
+
   return (
     <section aria-labelledby="candidate-name" className="mb-10">
-      <h2 id="candidate-name" className="break-words text-2xl font-semibold">{candidate.full_name}</h2>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h2 id="candidate-name" className="min-w-0 break-words text-2xl font-semibold">{candidate.full_name}</h2>
+        <button type="button" disabled={savingField !== null} onClick={() => { setSuccessMessage(""); setUpdateError(null); setEditing(true); }} className="inline-flex min-h-11 items-center gap-2 rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-60">
+          <Pencil size={16} aria-hidden="true" /> Editar candidatura
+        </button>
+      </div>
       {candidate.position && <p className="mt-1 text-zinc-600">{candidate.position}</p>}
       <dl className="mt-6 grid gap-5 sm:grid-cols-2">
         <Field label="Email">
@@ -256,7 +238,15 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
           {years !== null && `${years} ${years === 1 ? "año" : "años"}`}
         </Field>
         <Field label="LinkedIn"><ExternalLink href={candidate.linkedin_url} label="Ver perfil de LinkedIn" /></Field>
-        <Field label="CV"><ExternalLink href={candidate.cv_url} label="Ver CV" /></Field>
+        <Field label="CV">{candidate.cv_file ? candidate.cv_file.name : <ExternalLink href={candidate.cv_url} label="Ver CV" />}</Field>
+        <Field label="País de residencia">{candidate.country && getLabel(COUNTRY_LABELS, candidate.country, candidate.country)}</Field>
+        <Field label="Ciudad de residencia">{candidate.location}</Field>
+        <Field label="Permiso de trabajo o visado">{candidate.work_authorization && getLabel(WORK_AUTHORIZATION_OPTIONS, candidate.work_authorization, candidate.work_authorization)}</Field>
+        <Field label="Disponibilidad (en días)">{candidate.availability !== null ? `${candidate.availability} ${candidate.availability === 1 ? "día" : "días"}` : null}</Field>
+        <Field label="Expectativa salarial neta anual en euros">{candidate.expected_salary !== null ? String(candidate.expected_salary) : null}</Field>
+        <Field label="Fuente de reclutamiento">{candidate.recruitment_source && getLabel(RECRUITMENT_SOURCE_OPTIONS, candidate.recruitment_source, candidate.recruitment_source)}</Field>
+        <Field label="Otras URLs relevantes">{candidate.relevant_urls.length > 0 && <ul className="space-y-1">{candidate.relevant_urls.map((url, index) => <li key={`${url}-${index}`}><ExternalLink href={url} label={url} /></li>)}</ul>}</Field>
+        <Field label="Archivos adicionales">{candidate.additional_files.length > 0 && <ul className="space-y-1">{candidate.additional_files.map((file, index) => <li key={`${file.name}-${index}`}>{file.name}</li>)}</ul>}</Field>
         <Field label="Estado">
           <select
             aria-label="Estado"
@@ -269,7 +259,7 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
           >
             {!Object.hasOwn(STATUS_LABELS, candidate.status) && (
               <option value={candidate.status} disabled>
-                {getLabel(STATUS_LABELS, candidate.status, candidate.status || "No disponible")}
+                {getLabel(STATUS_LABELS, candidate.status, candidate.status || "No indicado")}
               </option>
             )}
             <option value="received">Recibida</option>
@@ -291,7 +281,7 @@ export default function CandidateDetail({ candidateId }: { candidateId: string }
             {isTerminalState && <option value="completed" disabled>Concluida</option>}
             {!isTerminalState && (!Object.hasOwn(STAGE_LABELS, candidate.stage) || candidate.stage === "completed") && (
               <option value={candidate.stage} disabled>
-                {getLabel(STAGE_LABELS, candidate.stage, candidate.stage || "No disponible")}
+                {getLabel(STAGE_LABELS, candidate.stage, candidate.stage || "No indicado")}
               </option>
             )}
             <option value="pending">Pendiente de revisión</option>
