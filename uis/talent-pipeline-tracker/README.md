@@ -185,6 +185,15 @@ npx playwright install --with-deps chromium
 npm run test:e2e
 ```
 
+`npx playwright test` runs the same suite directly. In this Linux dev container,
+Chromium's system libraries were extracted without elevated permissions into
+`/tmp/trackflow-browser-libs/usr/lib/x86_64-linux-gnu`. The Playwright configuration
+detects that directory only when GLib exists and sets the library path for the browser
+process, so the direct command needs no manual `LD_LIBRARY_PATH` prefix. Set
+`PLAYWRIGHT_BROWSER_LIBRARY_PATH` to use another extracted-library directory.
+This fallback does not download or install dependencies; on a fresh system use the
+standard Playwright installation command above. Non-Linux launches are unchanged.
+
 The twenty-nine Playwright scenarios cover required fields, country options and DOM order,
 numeric days and legacy availability migration, consistent empty markers and zero values,
 net salary, optional URLs/attachments, JSON bytes and filenames,

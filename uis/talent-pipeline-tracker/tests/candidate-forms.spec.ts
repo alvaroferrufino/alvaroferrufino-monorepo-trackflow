@@ -48,16 +48,18 @@ async function openCreate(page: Page) {
 }
 
 async function fillCreate(page: Page, includeCv = true) {
+  const form = page.getByRole("form", { name: "Nueva candidatura", exact: true });
   await page.getByLabel("Nombre completo").fill("  Beatriz Ruiz  ");
-  await page.getByLabel("Email", { exact: false }).first().fill("beatriz@example.com");
-  await page.getByLabel("Teléfono").fill("600123456");
-  await page.getByLabel("Puesto", { exact: false }).selectOption("Backend Developer");
-  await page.getByLabel("Años de experiencia").fill("0");
-  await page.getByLabel("Ciudad de residencia").fill("Barcelona");
-  await page.getByLabel("País de residencia").selectOption("ES");
+  await form.getByRole("textbox", { name: "Email *", exact: true }).fill("beatriz@example.com");
+  await form.getByRole("combobox", { name: "Prefijo telefónico internacional", exact: true }).selectOption("ES");
+  await form.getByRole("textbox", { name: "Teléfono *", exact: true }).fill("600123456");
+  await form.getByRole("combobox", { name: "Puesto *", exact: true }).selectOption("Backend Developer");
+  await form.getByRole("spinbutton", { name: "Años de experiencia *", exact: true }).fill("0");
+  await form.getByRole("combobox", { name: "País de residencia *", exact: true }).selectOption("ES");
+  await form.getByRole("textbox", { name: "Ciudad de residencia *", exact: true }).fill("Barcelona");
   await page.getByLabel("Expectativa salarial neta anual en euros").fill("35000");
   await page.getByLabel("Permiso de trabajo o visado").selectOption("visa_sponsorship");
-  await page.getByLabel("Disponibilidad (en días)").fill("0");
+  await form.getByRole("spinbutton", { name: "Disponibilidad (en días) *", exact: true }).fill("0");
   await page.getByLabel("Fuente de reclutamiento").selectOption("linkedin");
   if (includeCv) await page.getByLabel("CV *", { exact: true }).setInputFiles(cvFile);
 }
@@ -289,10 +291,12 @@ test("puestos profesionales y experiencia entre cero y cincuenta", async ({ page
   const experience = page.getByLabel("Años de experiencia");
   await expect(experience).toHaveAttribute("min", "0");
   await expect(experience).toHaveAttribute("max", "50");
-  await experience.fill("51");
-  await page.getByRole("button", { name: "Registrar candidatura", exact: true }).click();
-  await expect(page.getByRole("form").getByRole("alert")).toContainText("entre 0 y 50");
-  expect(payload).toBeUndefined();
+  for (const invalid of ["-1", "51"]) {
+    await experience.fill(invalid);
+    await page.getByRole("button", { name: "Registrar candidatura", exact: true }).click();
+    await expect(page.getByRole("form").getByRole("alert")).toContainText("entre 0 y 50");
+    expect(payload).toBeUndefined();
+  }
   await experience.fill("50");
   await position.selectOption("AI Engineer");
   await page.getByRole("button", { name: "Registrar candidatura", exact: true }).click();
@@ -351,8 +355,10 @@ test("prefijos por país y teléfono internacional consistente", async ({ page }
   });
   await openCreate(page);
   await fillCreate(page);
-  const prefix = page.getByLabel("Prefijo telefónico internacional", { exact: true });
-  for (const label of ["+34 España", "+41 Suiza", "+591 Bolivia"]) await expect(prefix.getByRole("option", { name: label, exact: true })).toBeAttached();
+  const prefix = page.getByRole("combobox", { name: "Prefijo telefónico internacional", exact: true });
+  for (const [country, label] of [["ES", "+34 España"], ["CH", "+41 Suiza"], ["BO", "+591 Bolivia"]]) {
+    await expect(prefix.locator(`option[value="${country}"]`)).toContainText(label);
+  }
   await prefix.selectOption("BO");
   await page.getByLabel("Teléfono *", { exact: true }).fill("abc");
   await page.getByRole("button", { name: "Registrar candidatura", exact: true }).click();
@@ -446,7 +452,7 @@ test("disponibilidad numérica obligatoria valida días enteros y envía número
   });
   await openCreate(page);
   await fillCreate(page);
-  const details = page.getByLabel("Disponibilidad (en días) *", { exact: true });
+  const details = page.getByRole("spinbutton", { name: "Disponibilidad (en días) *", exact: true });
   await expect(details).toHaveAttribute("type", "number");
   await expect(details).toHaveAttribute("min", "0");
   await expect(details).toHaveAttribute("step", "1");
@@ -552,9 +558,17 @@ test("país aparece inmediatamente antes de ciudad en alta y edición", async ({
       await page.goto("/candidates/candidate-1");
       await page.getByRole("button", { name: "Editar candidatura" }).click();
     } else await openCreate(page);
+    const form = page.getByRole("form");
+    const country = form.getByRole("combobox", { name: "País de residencia *", exact: true });
+    const city = form.getByRole("textbox", { name: "Ciudad de residencia *", exact: true });
+    await expect(country).toBeVisible();
+    await expect(city).toBeVisible();
+    await expect(form.getByRole("combobox", { name: "Puesto *", exact: true })).toBeVisible();
+    await expect(form.getByRole("combobox", { name: "Prefijo telefónico internacional", exact: true })).toBeVisible();
     const names = await page.getByRole("form").locator("input[name],select[name]").evaluateAll((elements) => elements.map((element) => element.getAttribute("name")));
+    expect(names.indexOf("country")).toBeGreaterThanOrEqual(0);
     expect(names[names.indexOf("country") + 1]).toBe("location");
-    await expect(page.getByLabel("Disponibilidad (en días)")).toHaveAttribute("type", "number");
+    await expect(form.getByRole("spinbutton", { name: "Disponibilidad (en días) *", exact: true })).toHaveAttribute("type", "number");
   }
 });
 
