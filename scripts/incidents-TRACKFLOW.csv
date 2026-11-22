@@ -1,0 +1,101 @@
+incident_id,created_at,warehouse,carrier,customer_type,category,status,satisfaction_score,description
+TF-001,2026-01-05,los_angeles,UPS,b2c,entrega_fallida,cerrado,4,Entrega reprogramada tras ausencia
+TF-002,2026-01-05,los_angeles,FedEx,b2b,paquete_perdido,cerrado,4,Paquete localizado en centro de tránsito
+TF-003,2026-01-05,zaragoza,MRW,b2c,direccion_incorrecta,cerrado,4,Dirección corregida antes del reparto
+TF-004,2026-01-05,zaragoza,SEUR,b2c,devolucion,cerrado,4,Recogida de devolución completada
+TF-005,2026-01-05,los_angeles,,b2b,inventario_stock,cerrado,4,Discrepancia de stock conciliada
+TF-006,2026-01-05,zaragoza,DHL,b2c,consulta_seguimiento,cerrado,4,Estado de envío comunicado
+TF-007,2026-01-12,los_angeles,UPS,b2c,entrega_fallida,abierto,,Pendiente de segundo intento de entrega
+TF-008,2026-01-12,los_angeles,FedEx,b2b,paquete_perdido,abierto,,Investigación de envío sin escaneo
+TF-009,2026-01-12,zaragoza,MRW,b2c,direccion_incorrecta,abierto,,Pendiente de confirmar dirección
+TF-010,2026-01-12,zaragoza,SEUR,b2c,devolucion,abierto,,Pendiente de programar recogida
+TF-011,2026-01-12,los_angeles,,b2b,inventario_stock,abierto,,Recuento de inventario solicitado
+TF-012,2026-01-12,zaragoza,DHL,b2c,consulta_seguimiento,abierto,,Consulta sobre actualización de tránsito
+TF-013,2026-01-19,los_angeles,UPS,b2c,entrega_fallida,descartado,,Entrega confirmada antes de la incidencia
+TF-014,2026-01-19,los_angeles,FedEx,b2b,paquete_perdido,descartado,,Registro duplicado de investigación
+TF-015,2026-01-19,zaragoza,MRW,b2c,direccion_incorrecta,descartado,,Dirección confirmada sin cambios
+TF-016,2026-01-19,zaragoza,SEUR,b2c,devolucion,descartado,,Solicitud de devolución duplicada
+TF-017,2026-01-19,los_angeles,,b2b,inventario_stock,descartado,,Diferencia resuelta por actualización previa
+TF-018,2026-01-19,zaragoza,DHL,b2c,consulta_seguimiento,descartado,,Consulta repetida del mismo envío
+TF-019,2026-02-02,los_angeles,UPS,b2c,entrega_fallida,cerrado,4,Segundo intento completado
+TF-020,2026-02-02,los_angeles,FedEx,b2b,paquete_perdido,cerrado,4,Envío recuperado en clasificación
+TF-021,2026-02-02,zaragoza,MRW,b2c,direccion_incorrecta,cerrado,4,Datos de entrega actualizados
+TF-022,2026-02-02,zaragoza,SEUR,b2c,devolucion,cerrado,4,Producto devuelto al almacén
+TF-023,2026-02-02,los_angeles,,b2b,inventario_stock,cerrado,4,Stock ajustado tras recuento
+TF-024,2026-02-02,zaragoza,DHL,b2c,consulta_seguimiento,cerrado,4,Información de tránsito facilitada
+TF-025,2026-02-09,los_angeles,UPS,b2c,entrega_fallida,abierto,,Destinatario solicita nueva franja
+TF-026,2026-02-09,los_angeles,FedEx,b2b,paquete_perdido,abierto,,Transportista revisa trazabilidad
+TF-027,2026-02-09,zaragoza,MRW,b2c,direccion_incorrecta,abierto,,Falta dato de acceso para entrega
+TF-028,2026-02-09,zaragoza,SEUR,b2c,devolucion,abierto,,Etiqueta de devolución pendiente
+TF-029,2026-02-09,los_angeles,,b2b,inventario_stock,abierto,,Unidades pendientes de conciliación
+TF-030,2026-02-09,zaragoza,DHL,b2c,consulta_seguimiento,abierto,,Seguimiento sin movimiento reciente
+TF-031,2026-02-16,los_angeles,UPS,b2c,entrega_fallida,descartado,,Incidencia asociada a envío duplicado
+TF-032,2026-02-16,los_angeles,FedEx,b2b,paquete_perdido,descartado,,Escaneo posterior confirma tránsito
+TF-033,2026-02-16,zaragoza,MRW,b2c,direccion_incorrecta,descartado,,Aviso de dirección generado por error
+TF-034,2026-02-16,zaragoza,SEUR,b2c,devolucion,descartado,,Petición de devolución cancelada
+TF-035,2026-02-16,los_angeles,,b2b,inventario_stock,descartado,,Recuento previo ya corregido
+TF-036,2026-02-16,zaragoza,DHL,b2c,consulta_seguimiento,descartado,,Consulta resuelta en otro ticket
+TF-037,2026-03-02,los_angeles,UPS,b2c,entrega_fallida,cerrado,4,Entrega completada en nuevo intento
+TF-038,2026-03-02,los_angeles,FedEx,b2b,paquete_perdido,cerrado,4,Bulto recuperado y entregado
+TF-039,2026-03-02,zaragoza,MRW,b2c,direccion_incorrecta,cerrado,4,Corrección transmitida al transportista
+TF-040,2026-03-02,zaragoza,SEUR,b2c,devolucion,cerrado,4,Recogida confirmada y registrada
+TF-041,2026-03-02,los_angeles,,b2b,inventario_stock,cerrado,4,Unidades localizadas en almacén
+TF-042,2026-03-02,zaragoza,DHL,b2c,consulta_seguimiento,cerrado,4,Fecha estimada comunicada
+TF-043,2026-03-09,los_angeles,UPS,b2c,entrega_fallida,abierto,,Nuevo reparto pendiente de asignación
+TF-044,2026-03-09,los_angeles,FedEx,b2b,paquete_perdido,abierto,,Solicitud de búsqueda al transportista
+TF-045,2026-03-09,zaragoza,MRW,b2c,direccion_incorrecta,abierto,,Dirección en revisión por soporte
+TF-046,2026-03-09,zaragoza,SEUR,b2c,devolucion,abierto,,Recogida pendiente de confirmación
+TF-047,2026-03-09,los_angeles,,b2b,inventario_stock,abierto,,Diferencia detectada durante picking
+TF-048,2026-03-09,zaragoza,DHL,b2c,consulta_seguimiento,abierto,,Esperando nueva lectura del envío
+TF-049,2026-03-16,los_angeles,UPS,b2c,entrega_fallida,descartado,,Entrega registrada en incidencia anterior
+TF-050,2026-03-16,los_angeles,FedEx,b2b,paquete_perdido,descartado,,Seguimiento actualizado sin pérdida
+TF-051,2026-03-16,zaragoza,MRW,b2c,direccion_incorrecta,descartado,,Datos correctos en etiqueta original
+TF-052,2026-03-16,zaragoza,SEUR,b2c,devolucion,descartado,,Recogida duplicada en sistema
+TF-053,2026-03-16,los_angeles,,b2b,inventario_stock,descartado,,Ajuste ya realizado por operaciones
+TF-054,2026-03-16,zaragoza,DHL,b2c,consulta_seguimiento,descartado,,Ticket duplicado de seguimiento
+TF-055,2026-04-06,los_angeles,UPS,b2c,entrega_fallida,cerrado,4,Paquete entregado tras reprogramación
+TF-056,2026-04-06,los_angeles,FedEx,b2b,paquete_perdido,cerrado,4,Envío identificado en plataforma
+TF-057,2026-04-06,zaragoza,MRW,b2c,direccion_incorrecta,cerrado,4,Corrección validada con destinatario
+TF-058,2026-04-06,zaragoza,SEUR,b2c,devolucion,cerrado,4,Devolución recibida en Zaragoza
+TF-059,2026-04-06,los_angeles,,b2b,inventario_stock,cerrado,4,Inventario corregido en sistema
+TF-060,2026-04-06,zaragoza,DHL,b2c,consulta_seguimiento,cerrado,4,Último estado de reparto comunicado
+TF-061,2026-04-13,los_angeles,UPS,b2c,entrega_fallida,abierto,,Intento fallido por acceso cerrado
+TF-062,2026-04-13,los_angeles,FedEx,b2b,paquete_perdido,abierto,,Revisión de manifiesto en curso
+TF-063,2026-04-13,zaragoza,MRW,b2c,direccion_incorrecta,abierto,,Código de acceso pendiente
+TF-064,2026-04-13,zaragoza,SEUR,b2c,devolucion,abierto,,Cliente solicita recogida posterior
+TF-065,2026-04-13,los_angeles,,b2b,inventario_stock,abierto,,Revisión de ubicación de unidades
+TF-066,2026-04-13,zaragoza,DHL,b2c,consulta_seguimiento,abierto,,Consulta de fecha estimada
+TF-067,2026-04-20,los_angeles,UPS,b2c,entrega_fallida,descartado,,Aviso repetido del mismo intento
+TF-068,2026-04-20,los_angeles,FedEx,b2b,paquete_perdido,descartado,,Paquete localizado antes del aviso
+TF-069,2026-04-20,zaragoza,MRW,b2c,direccion_incorrecta,descartado,,Dirección verificada previamente
+TF-070,2026-04-20,zaragoza,SEUR,b2c,devolucion,descartado,,Solicitud anulada por duplicidad
+TF-071,2026-04-20,los_angeles,,b2b,inventario_stock,descartado,,Incidencia de stock duplicada
+TF-072,2026-04-20,zaragoza,DHL,b2c,consulta_seguimiento,descartado,,Seguimiento respondido previamente
+TF-073,2026-05-04,los_angeles,UPS,b2c,entrega_fallida,cerrado,4,Entrega realizada en segunda visita
+TF-074,2026-05-04,los_angeles,FedEx,b2b,paquete_perdido,cerrado,4,Paquete recuperado del centro logístico
+TF-075,2026-05-04,zaragoza,MRW,b2c,direccion_incorrecta,cerrado,4,Dirección corregida y reparto completado
+TF-076,2026-05-04,zaragoza,SEUR,b2c,devolucion,cerrado,4,Devolución procesada en almacén
+TF-077,2026-05-04,los_angeles,,b2b,inventario_stock,cerrado,4,Recuento físico coincide con sistema
+TF-078,2026-05-04,zaragoza,DHL,b2c,consulta_seguimiento,cerrado,4,Consulta respondida por soporte
+TF-079,2026-05-11,los_angeles,UPS,b2c,entrega_fallida,abierto,,Reparto pendiente por ausencia
+TF-080,2026-05-11,los_angeles,FedEx,b2b,paquete_perdido,abierto,,Sin confirmación del último centro
+TF-081,2026-05-11,zaragoza,MRW,b2c,direccion_incorrecta,abierto,,Validación de dirección pendiente
+TF-082,2026-05-11,zaragoza,SEUR,b2c,devolucion,abierto,,Pendiente de recepción de artículo
+TF-083,2026-05-11,los_angeles,,b2b,inventario_stock,abierto,,Inventario en revisión manual
+TF-084,2026-05-11,zaragoza,DHL,b2c,consulta_seguimiento,abierto,,Estado del envío pendiente de respuesta
+TF-085,2026-05-18,los_angeles,UPS,b2c,entrega_fallida,descartado,,Entrega confirmada en otro registro
+TF-086,2026-05-18,los_angeles,FedEx,b2b,paquete_perdido,descartado,,Incidencia creada dos veces
+TF-087,2026-05-18,zaragoza,MRW,b2c,direccion_incorrecta,descartado,,Dirección coincidente con orden
+TF-088,2026-05-18,zaragoza,SEUR,b2c,devolucion,descartado,,Recogida cancelada por duplicidad
+TF-089,2026-05-18,los_angeles,,b2b,inventario_stock,descartado,,Alerta de inventario duplicada
+TF-090,2026-05-18,zaragoza,DHL,b2c,consulta_seguimiento,descartado,,Consulta de tracking repetida
+,2026-05-25,zaragoza,MRW,b2c,devolucion,abierto,,Identificador ausente deliberadamente
+TF-092,2026-02-30,zaragoza,MRW,b2c,devolucion,abierto,,Fecha inexistente deliberadamente
+TF-093,2026-05-25,madrid,MRW,b2c,devolucion,abierto,,Almacén fuera del conjunto permitido
+TF-094,2026-05-25,zaragoza,MRW,otro,devolucion,abierto,,Tipo de cliente no permitido
+TF-095,2026-05-25,zaragoza,MRW,b2c,retraso,abierto,,Categoría no permitida
+TF-096,2026-05-25,zaragoza,MRW,b2c,devolucion,pendiente,,Estado no permitido
+TF-097,2026-05-25,zaragoza,MRW,b2c,devolucion,cerrado,6,Puntuación fuera de rango
+TF-098,2026-05-25,zaragoza,MRW,b2c,devolucion,cerrado,NaN,Puntuación no finita
+,fecha-invalida,zaragoza,MRW,b2c,otra,abierto,,Identificador ausente fecha y categoría inválidas
+TF-100,2026-05-25,zaragoza,MRW,b2c,devolucion,pendiente,mala,Estado y puntuación inválidos

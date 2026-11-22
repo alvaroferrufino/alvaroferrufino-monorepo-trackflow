@@ -2,10 +2,15 @@
 
 ## 1. Estado Actual del Proyecto
 
-- **Rama activa:** `feature/agent-memory-bank`.
-- **Hito en curso:** Estandarización del contexto corporativo de **TrackFlow** y creación del banco de memoria persistente para desarrollo asistido por agentes.
+- **Rama activa:** `feat/incident-analyzer`.
+- **Hito en curso:** Revisión previa al commit de las fases 1 y 2 del Analizador de Incidencias de TrackFlow.
 
 ### 1.1 Logros Completados
+
+- **Analizador de Incidencias, Fase 1 completada:** `packages/incident_analyzer/` comparte el esquema, la validación CSV, el cálculo de métricas y la exportación con la CLI `scripts/analyze.py`. La muestra sintética de 100 registros está en `scripts/incidents-TRACKFLOW.csv` y las reglas y resultados esperados están en `docs/INCIDENTS_SPEC.md`.
+- **Analizador de Incidencias, Fase 2 completada:** la API FastAPI `services/api/` reutiliza el paquete compartido para analizar cargas CSV y descargar resultados asociados a identificadores independientes. La interfaz `uis/backoffice/` incorpora selección y arrastre de archivos, indicadores, errores, desgloses y descarga CSV. El cliente detecta la URL de la API en local, Codespaces y otros hosts; CORS admite el Codespace actual y orígenes explícitamente configurados.
+- **Correcciones de revisión:** las filas truncadas se contabilizan como inválidas; cada pestaña descarga su propio análisis mediante `X-Analysis-ID`. Se mantienen hasta 100 resultados por proceso y se excluyen localmente los artefactos generados del staging ordinario.
+- **Pendientes del analizador:** persistencia compartida para múltiples workers y autenticación del backoffice. Los resultados permanecen únicamente en la memoria del proceso.
 
 1. **Unificación del contexto oficial de TrackFlow (sin placeholders):**
    - Incorporación de [`BRIEFING.md`](../BRIEFING.md) en la raíz con el documento completo de negocio, organización, liderazgo y problemáticas departamentales de TrackFlow.
@@ -29,15 +34,18 @@
 Los siguientes hitos traducen directamente las necesidades de los ocho departamentos de TrackFlow a la arquitectura del monorepo:
 
 ### Fase 1 — Consolidación del Entorno de Agentes y Gobernanza
+
 - Completar y validar el resto de reglas o skills internas del entorno de desarrollo en `./.agents/` (manteniéndolas estrictamente separadas de `./agents/` y `./skills/` de producto) y cerrar el merge de `feature/agent-memory-bank`.
 - Mantener `./memory-bank/progress.md` y `./memory-bank/techContext.md` actualizados al cierre de cada rama funcional.
 
 ### Fase 2 — Interfaces Web Públicas e Internas (`./uis/`)
+
 - **`./uis/website` (entrada en `/`):** construir la web corporativa pública de TrackFlow orientada a marcas de e-commerce e integrar el portal público de seguimiento de envíos para consumidores finales (B2C).
-- **`./uis/backoffice` (layout propio y entrada en `/`):** levantar la aplicación administrativa interna unificada de TrackFlow con autenticación y navegación modular para alojar los paneles de Operaciones de Almacén, Última Milla, Logística Inversa, Experiencia del Cliente, Comercial/CRM, Personas y Dirección Ejecutiva.
+- **`./uis/backoffice` (layout propio y entrada en `/`):** ampliar la interfaz inicial del analizador con autenticación y navegación modular para alojar los paneles de Operaciones de Almacén, Última Milla, Logística Inversa, Experiencia del Cliente, Comercial/CRM, Personas y Dirección Ejecutiva.
 
 ### Fase 3 — Backend Centralizado (`./services/api/` en FastAPI) y Contratos Compartidos
-- Crear `./services/api/` en **FastAPI** junto con `docker-compose.yml` en la raíz del repositorio y esquemas compartidos en `./packages/` y `./shared/`.
+
+- Ampliar `./services/api/` en **FastAPI** junto con `docker-compose.yml` en la raíz del repositorio y esquemas compartidos en `./packages/` y `./shared/`.
 - Implementar los dominios prioritarios de negocio:
   - **Almacenes (`US-LAX` y `ES-ZAZ`):** API unificada de inventario en tiempo real por SKU y recepción estructurada de pedidos.
   - **Última Milla:** agregador de tracking de los **8 transportistas** (UPS, FedEx, DHL, MRW, SEUR y 2 locales) y motor de recomendación óptima por destino, peso y urgencia.
@@ -45,11 +53,13 @@ Los siguientes hitos traducen directamente las necesidades de los ocho departame
   - **Soporte, Comercial y Personas:** API unificada de tickets B2B/B2C, fichas de salud de clientes con alertas de renovación (90/30 días), gestión de onboarding/vacaciones binacional y persistencia backend definitiva para `./uis/talent-pipeline-tracker`.
 
 ### Fase 4 — Datos, Pipelines y Telemetría Centralizada (`./data/` + Observabilidad)
+
 - Sustituir la detección manual de fallos por WhatsApp mediante **telemetría, logging estructurado y monitorización centralizada** entre Los Ángeles y Zaragoza con alertas automáticas e indicadores de salud de servicios.
 - Desarrollar pipelines ETL/ELT en `./data/pipelines/` (`raw/` → `pipelines/` → `process/`) para unificar datos de ambos almacenes, histórico de transportistas (entregas a tiempo, incidencias por ruta, coste/kg), motivos de devolución y KPIs globales para el dashboard ejecutivo en tiempo real.
 - Establecer conjuntos de evaluación en `./data/eval/` para validar precisión de pipelines, búsquedas RAG y agentes.
 
 ### Fase 5 — RAG, Agentes de Producto y Servidores MCP (`./agents/`, `./skills/`, `./mcps/`)
+
 - **Base de conocimiento semántica (RAG):** indexar políticas operativas de clientes, procedimientos logísticos y normativas internas de RR. HH. (EE. UU. y España), con soporte bilingüe español/inglés.
 - **Agentes operativos de TrackFlow en `./agents/`:**
   - Agente de soporte de primera línea 24/7 para consultas repetitivas de tracking y devoluciones + detección de sentimiento negativo.
@@ -61,6 +71,7 @@ Los siguientes hitos traducen directamente las necesidades de los ocho departame
 - **Servidores MCP en `./mcps/`:** exponer acceso seguro y auditable a inventario, envíos, devoluciones y métricas operativas para los agentes.
 
 ### Fase 6 — Automatización y Workflows Transversales (`./workflows/`)
+
 - Implementar flujos automatizados (n8n, webhooks y tareas programadas) que conecten API, datos y agentes:
   - Ingesta e interpretación automática de pedidos recibidos por correo electrónico y alertas de stock bajo.
   - Flujo extremo a extremo de recogida de devoluciones (`aprobación → etiqueta → programación con transportista`).
