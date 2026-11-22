@@ -67,3 +67,5 @@ Los siguientes hitos traducen directamente las necesidades de los ocho departame
   - Solicitud y provisión automatizada de accesos internos en nuevas incorporaciones.
   - Alertas proactivas de renovación de contratos anuales a 90 y 30 días y rutinas de operaciones TI (backups, health checks).
   - **Generación y envío automático del informe ejecutivo semanal cada lunes a las 07:00**, eliminando las 3–4 horas de consolidación manual de cada domingo por la noche.
+
+- Propuesta de arquitectura de backend documentada en docs/ARCHITECTURE_PROPOSAL.md en la rama feat/backend-architecture-proposal.
