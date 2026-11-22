@@ -14,7 +14,7 @@ _These instructions are also available in [English](./README.md)._
 Este repositorio es la **plantilla de inicio** para los proyectos transversales. Trabajarás con escenarios de empresas reales (Brasaland, TrackFlow, Nexova) construyendo entregables que se corresponden con los hitos del curso (Web, Programación, Backend, Telemetría, RAG, Agentes, Workflows, Tiempo real).
 
 - Crea una plantilla a partir de este repositorio.
-- Reemplaza el `CONTEXT.md` placeholder por el contexto de tu empresa asignada.
+- `CONTEXT.md` ya contiene el contexto de la empresa TrackFlow (mismo contenido que `BRIEFING.md`) en este repositorio.
 - Usa `skills/` y los `README.md` por carpeta como guía de trabajo.
 
 ---
@@ -53,8 +53,8 @@ Estás construyendo **una sola empresa** a lo largo de muchos hitos y proyectos.
 
 > 💡 Actualmente el repositorio ofrece solo una **estructura base de carpetas y documentación**. Todavía no incluye aplicaciones ejecutables ni scripts globales en la raíz.
 >
-> - `CONTEXT.md` es un placeholder y debe sustituirse por el contexto de la empresa asignada.
-> - No existe todavía un `AGENTS.md` en la raíz.
+> - `CONTEXT.md` (y `CONTEXT.es.md`) ya están configurados para **TrackFlow** en este repositorio, alineados con [`BRIEFING.md`](./BRIEFING.md).
+> - Un [`AGENTS.md`](./AGENTS.md) en la raíz define las reglas obligatorias para agentes de codificación, apoyado en [`memory-bank/`](./memory-bank) y en las reglas/skills de desarrollo de [`.agents/`](./.agents).
 > - Existe metadata del paquete compartido en `packages/shared/package.json` (`@repo/shared-types`), pero aún no hay runner de workspace en raíz.
 
 ---
@@ -269,7 +269,7 @@ Guía rápida de decisión:
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # Esta guía
-├── CONTEXT.md                 # ← Reemplazar con el briefing de tu empresa
+├── CONTEXT.md                 # Briefing de la empresa TrackFlow
 ├── docker-compose.yml         # ← Orquestación local (raíz del repo)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # API FastAPI centralizada de la empresa
