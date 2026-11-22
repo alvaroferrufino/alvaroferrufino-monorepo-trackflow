@@ -14,7 +14,7 @@ _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 This repository is the **starter template** for transversal projects. You will work on real company scenarios (Brasaland, TrackFlow, Nexova), building deliverables that map to course milestones (Web, Programming, Backend, Telemetry, RAG, Agents, Workflows, Real-time).
 
 - Create a template from this repository.
-- Replace the placeholder `CONTEXT.md` with your assigned company context.
+- `CONTEXT.md` already contains the TrackFlow company context (same content as `BRIEFING.md`) in this repository.
 - Use `skills/` and the directory-level `README.md` files as working guidance.
 
 ---
@@ -53,8 +53,8 @@ You are building **one company** across many milestones and projects. Each top-l
 
 > 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
 >
-> - `CONTEXT.md` is a placeholder and must be replaced with your assigned company context.
-> - There is no root `AGENTS.md` yet.
+> - `CONTEXT.md` (and `CONTEXT.es.md`) are already configured for **TrackFlow** in this repository, aligned with [`BRIEFING.md`](./BRIEFING.md).
+> - A root [`AGENTS.md`](./AGENTS.md) defines the mandatory rules for coding agents, backed by [`memory-bank/`](./memory-bank) and the development rules/skills in [`.agents/`](./.agents).
 > - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
 
 ---
@@ -269,7 +269,7 @@ Is it a CLI tool with its own package?     → internal/
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # This guide
-├── CONTEXT.md                 # ← Replace with your company briefing
+├── CONTEXT.md                 # TrackFlow company briefing
 ├── docker-compose.yml         # ← Local dev orchestration (repo root)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # Centralized FastAPI company API

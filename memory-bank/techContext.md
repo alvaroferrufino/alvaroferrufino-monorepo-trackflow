@@ -1,0 +1,64 @@
+# TrackFlow — Technical Context & Monorepo Architecture
+
+## 1. Estado Técnico Actual de TrackFlow (Baseline Heredado)
+
+La infraestructura heredada de TrackFlow es el resultado de más de una década de crecimiento operativo entre Los Ángeles y Zaragoza sin una arquitectura unificada:
+
+- **Dos sistemas de almacén (WMS) desconectados:** El almacén de un país opera sobre un **software comercial** cerrado mientras que el otro gestiona el stock y las entradas/salidas en una **hoja de cálculo avanzada**, impidiendo consultar el inventario global por SKU en tiempo real.
+- **ERP legado:** Sistema ERP implantado a **principios de la década de 2010**, con capacidades limitadas de integración moderna.
+- **Integraciones frágiles no documentadas:** Conectores construidos de urgencia mediante **scripts de Python punto a punto** sin documentación técnica, tests ni control de errores estandarizado.
+- **Datos dispersos en múltiples nubes y ofimática:** Bases de datos alojadas en **distintos proveedores cloud** según el país o sistema, sumadas a información crítica atrapada en hojas de cálculo personales (cuentas comerciales), documentos de Word en Google Drive (soporte al cliente), correos electrónicos (pedidos entrantes y onboarding) y portales externos aislados de **8 transportistas** (UPS, FedEx, DHL, MRW, SEUR y 2 operadores locales).
+- **Ausencia de telemetría y observabilidad centralizada:** No existe agregación de logs, métricas ni trazas entre Estados Unidos y España. Los fallos de endpoints en Los Ángeles se comunican manualmente por WhatsApp al equipo técnico en Zaragoza, y el ciclo de despliegue de cambios oscila entre **1 y 2 semanas**.
+
+---
+
+## 2. Arquitectura Objetivo de TrackFlow Tech en el Monorepo
+
+Para sustituir progresivamente el mosaico heredado sin introducir una fragmentación prematura de microservicios, **TrackFlow Tech** centraliza todos los entregables de ingeniería, datos e IA en este monorepo bajo responsabilidades estrictas por directorio.
+
+### 2.1 Convenciones de Rutas de Producto
+
+| Ruta | Rol en TrackFlow | Convenciones clave |
+| --- | --- | --- |
+| `./uis/website` | **Web pública de TrackFlow** | Presencia corporativa pública orientada a marcas e-commerce y destinatarios finales (incluyendo vistas públicas como el portal de seguimiento de envíos). Su ruta de entrada principal es `/`. |
+| `./uis/backoffice` | **Aplicación interna unificada (Backoffice)** | Plataforma operativa interna con **layout propio** de aplicación administrativa y **punto de entrada en `/`**. Concentra en un solo frontend modular la autenticación y las herramientas internas de almacenes, transportistas, devoluciones, tickets de soporte, salud comercial/CRM, portal de Personas y cuadros de mando ejecutivos. |
+| `./uis/talent-pipeline-tracker` | **Tracker de selección y candidaturas (ya existente)** | Aplicación construida en **Next.js + TypeScript** para gestionar el pipeline de talento de TrackFlow (roles como *Process Excellence Manager*, *AI Engineer*, *Project Manager*, *Operations Lead*, *Logística y Operaciones*). Consume `NEXT_PUBLIC_API_URL` (`/records`), aplica validaciones estrictas de formulario/archivos, mantiene persistencia local complementaria en IndexedDB (`trackflow-candidates`) frente a las limitaciones de la API simulada actual y cuenta con 29 escenarios E2E en **Playwright** (servidor de test en puerto `3100`). |
+| `./services` | **Backend y workers de TrackFlow** | Centralizado en torno a una única API principal de compañía, como **`./services/api/` en FastAPI**, estructurada internamente por routers/dominios (`inventory`, `orders`, `carriers`, `tracking`, `returns`, `tickets`, `customers`, `people`, `telemetry`, `executive-kpis`, etc.). Solo se extraen workers independientes bajo `./services/` cuando un proceso en segundo plano realmente requiera ejecución desacoplada. |
+| `./agents` | **Agentes de IA de producto** | Agentes autónomos o semiautónomos que resuelven casos de uso operativos de TrackFlow (atención B2B/B2C 24/7, inspección y triaje de devoluciones, informes comerciales PDF, asistente interno de RR. HH., documentación técnica, copiloto ejecutivo). Cada agente vive en su propia subcarpeta creada a partir de [`./agents/_template/`](../agents/_template/README.md) y reutiliza conectores comunes en [`./agents/tools/`](../agents/tools/README.md). |
+| `./skills` | **Skills reutilizables de producto** | Capacidades modulares empaquetadas (`SKILL.md` + scripts/recursos opcionales) que los agentes y flujos del producto TrackFlow reutilizan de forma estandarizada (análisis de datos logísticos, investigación, auditoría, procesamiento documental). |
+| `./workflows` | **Orquestación y automatización operativa** | Flujos automatizados (exportaciones de **n8n**, webhooks, cron jobs y sincronizaciones entre sistemas) que conectan `./services`, `./data/pipelines` y `./agents` — por ejemplo: ingesta automática de pedidos por email, flujo de recogida de devoluciones, alertas de stock/renovación o el informe ejecutivo automático de cada lunes a las 07:00. |
+| `./data` | **Datos, pipelines ETL/ELT y evaluación** | Flujo estructurado en cuatro subcarpetas: `data/raw/` (datos crudos de origen documentando procedencia y reglas de PII), `data/pipelines/` (jobs de ingesta, limpieza y consolidación entre EE. UU. y España), `data/process/` (tablas limpias, agregados y features listos para `./services`, `./uis` y `./agents`) y `data/eval/` (golden sets y métricas de calidad para RAG, agentes y modelos). |
+| `./mcps` | **Servidores Model Context Protocol (MCP)** | Un servidor MCP por subcarpeta para exponer de forma controlada herramientas y datos en vivo a los agentes de TrackFlow (acceso a bases de datos unificadas, estado de inventario, conectores a los 8 transportistas o sistemas internos). |
+| `./packages` | **Paquetes y librerías compartidas** | Código versionable reutilizado por dos o más aplicaciones/servicios del monorepo, como tipos compartidos en TypeScript (`./packages/shared`, p. ej. `@repo/shared-types`), clientes HTTP/SDKs internos, esquemas validados o librería de componentes UI. |
+| `./shared` | **Activos compartidos ligeros (no empaquetados)** | Esquemas JSON, contratos OpenAPI, plantillas de correo o de reportes mensuales en PDF, tokens de diseño y recursos estáticos transversales que no justifican un paquete independiente en `./packages`. |
+
+### 2.2 Carpetas de Soporte Operativo e Ingeniería en el Monorepo
+
+- **`./docs`**: Documentación transversal de arquitectura del sistema TrackFlow, diagramas de integración, ADRs y guías de seguridad y observabilidad.
+- **`./infra` y `docker-compose.yml` (en raíz)**: Dockerfiles, manifiestos de despliegue, configuraciones de proxy/red y pipelines CI/CD viven en `./infra`, mientras que `docker-compose.yml` permanece en la raíz del repositorio para levantar localmente el stack completo (`services/api/`, bases de datos, colas, etc.).
+- **`./scripts` vs. `./internal`**: `./scripts` aloja scripts puntuales y repetibles de mantenimiento, semillas de datos o migraciones ligeras; `./internal` aloja herramientas internas robustas para ingeniería (CLIs, evaluadores de prompts, migradores empaquetados) con sus propias dependencias y tests.
+- **Artefactos fundacionales existentes en raíz**: [`BRIEFING.md`](../BRIEFING.md), [`CONTEXT.md`](../CONTEXT.md) y [`CONTEXT.es.md`](../CONTEXT.es.md) como fuente de verdad del dominio TrackFlow, [`AGENTS.md`](../AGENTS.md) como protocolo obligatorio de trabajo para agentes en el monorepo, además de los módulos base de tipado y utilidades en `./src` (`src/types/`, `src/utils/`), `./index.html` y `package.json` (`npm run typecheck` con TypeScript).
+
+---
+
+## 3. Separación Estricta: Código de Producto vs. `./.agents/` y `./memory-bank/`
+
+Es obligatorio mantener una frontera clara entre los artefactos que conforman la plataforma tecnológica de **TrackFlow** y las herramientas de asistencia al desarrollo del repositorio:
+
+1. **Código y activos de producto de TrackFlow (`./uis`, `./services`, `./agents`, `./skills`, `./workflows`, `./data`, `./mcps`, `./packages`, `./shared`, `./infra`, `./docs`, `./scripts`, `./internal`):**
+   - Pertenecen al **sistema de negocio de TrackFlow**.
+   - Se construyen, testean, versionan y despliegan para dar servicio a marcas cliente, consumidores finales, operarios de almacén, coordinadores de tráfico, agentes de soporte, RR. HH. y dirección ejecutiva.
+   - En particular, **`./agents` y `./skills` en la raíz contienen exclusivamente agentes y capacidades del producto TrackFlow**, nunca configuraciones internas del editor o del asistente de programación.
+
+2. **Configuración de agentes de desarrollo (`./.agents/`) y Banco de Memoria (`./memory-bank/`):**
+   - **`./.agents/`** (`./.agents/rules/` y `./.agents/skills/`) está reservado exclusivamente para la configuración, reglas de trabajo (como [`./.agents/rules/trackflow-monorepo-conventions.md`](../.agents/rules/trackflow-monorepo-conventions.md)) e instrucciones/skills de los **asistentes de codificación / agentes de IDE** que ayudan a los ingenieros a programar dentro del repositorio. No forma parte del runtime de TrackFlow ni debe alojar lógica de negocio o agentes operativos de la empresa.
+   - **`./memory-bank/`** (`projectbrief.md`, `techContext.md`, `progress.md`) actúa como **memoria persistente de contexto del proyecto** entre sesiones de ingeniería y desarrollo asistido por IA. Garantiza que cualquier intervención técnica parta de las reglas reales de negocio y arquitectura de TrackFlow, sin sustituir la documentación arquitectónica de producto en `./docs/` ni acoplarse al código desplegable.
+
+---
+
+## 4. Principios Técnicos Clave para Nuevos Desarrollos en TrackFlow
+
+- **Dominio único y consistente:** Todos los modelos de datos, endpoints, seeds y prompts deben reflejar la realidad operativa de TrackFlow (almacenes `US-LAX` / Los Ángeles y `ES-ZAZ` / Zaragoza, los 8 transportistas reales, operación B2B para marcas y B2C para destinatarios, moneda EUR/USD e idiomas ES/EN).
+- **Backend unificado antes que microservicios dispersos:** Priorizar módulos limpios dentro de `./services/api/` (FastAPI) con contratos tipados compartibles a través de `./packages` o `./shared`.
+- **Observabilidad desde el diseño:** Cada nuevo servicio, pipeline o agente debe emitir logs estructurados y métricas trazables para erradicar la dependencia de avisos manuales por WhatsApp entre Los Ángeles y Zaragoza.
+- **Seguridad y privacidad transfronteriza:** Respetar el tratamiento de datos personales (CCPA/marco EE. UU. y RGPD/marco España) tanto en datos de consumidores y marcas como en candidaturas y expedientes laborales de Personas, evitando subir PII real en `./data/raw/` o `./data/eval/`.
